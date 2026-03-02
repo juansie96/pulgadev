@@ -21,7 +21,7 @@ const transitionStyles = {
 export function useStaggerReveal({ mountDelay = 100 }: UseStaggerRevealOptions = {}) {
   const [isMounted, setIsMounted] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
       return false;
     }
 
@@ -29,6 +29,11 @@ export function useStaggerReveal({ mountDelay = 100 }: UseStaggerRevealOptions =
   });
 
   useEffect(() => {
+    if (typeof window.matchMedia !== 'function') {
+      const timeoutId = window.setTimeout(() => setIsMounted(true), mountDelay);
+      return () => window.clearTimeout(timeoutId);
+    }
+
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     const onChange = (event: MediaQueryListEvent) => {
